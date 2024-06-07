@@ -19,7 +19,7 @@ void InitializeGraph(GraphType* Graph);
 void InsertVertex(GraphType* Graph);
 void InsertEdge(GraphType* Graph, int start, int end);
 void DepthFirstSearch(GraphType* Graph, int start);
-void BreathFirstSearch();
+void BreathFirstSearch(GraphType* Graph);
 void Print(GraphType* Graph);
 void Quit(GraphType* Graph);
 
@@ -85,7 +85,7 @@ int main(){
             DepthFirstSearch(Graph, start);
         }
         else if (n == 'b' || n == 'B'){
-            BreathFirstSearch();
+            BreathFirstSearch(Graph);
         }
         else if (n == 'p' || n == 'P'){
             Print(Graph);
@@ -123,29 +123,31 @@ void InsertEdge(GraphType* Graph, int start, int end){
     GraphNode* node; 
     GraphNode* current;
     GraphNode* previous = NULL;
+    
+    //링크를 오름차순으로 하면 서치할때 작은것부터 찾아간다.
 
     if(start >= Graph->n || end >= Graph->n){ 
         printf("Wrong Vertex Number\n");
         return;
     }
 
-    node = (GraphNode*)malloc(sizeof(GraphNode)); 
-    node->vertex = end; 
-    node->link = NULL;
+    node = (GraphNode*)malloc(sizeof(GraphNode));  //그래프 노드 구조체 동적 할당
+    node->vertex = end;  //노드의 번호를 입력 받은 값으로 설정
+    node->link = NULL; //다음 노드를 가리키는 포인터를 NULL로 설정
 
-    current = Graph->adj_list[start];
+    current = Graph->adj_list[start]; //현재 노드를 시작 노드로 설정
 
-    while(current != NULL && current->vertex < end){
-        previous = current;
-        current = current->link;
+    while(current != NULL && current->vertex < end){ //현재 노드가 NULL이 아니고 현재 노드의 번호가 입력 받은 값보다 작으면
+        previous = current; //이전 노드에 현재 노드를 저장
+        current = current->link; //현재 노드를 다음 노드로 설정
     }
 
-    if(previous == NULL){
-        node->link = Graph->adj_list[start];
-        Graph->adj_list[start] = node;
+    if(previous == NULL){ //이전 노드가 NULL이면
+        node->link = Graph->adj_list[start]; //노드의 다음 노드를 시작 노드로 설정
+        Graph->adj_list[start] = node; //시작 노드를 노드로 설정
     } else {
-        node->link = previous->link;
-        previous->link = node;
+        node->link = previous->link; //노드의 다음 노드를 이전 노드의 다음 노드로 설정
+        previous->link = node; //이전 노드의 다음 노드를 노드로 설정
     }
 
     printf("Insert Edge\n");
@@ -172,8 +174,33 @@ void DepthFirstSearch(GraphType* Graph, int start){
 
 }
 
-void BreathFirstSearch(){
-    printf("Breath First Search\n");
+void BreathFirstSearch(GraphType* Graph){
+    int i, j = 0;
+    GraphNode* w;
+    int* queue = (int*)malloc(Graph->n * sizeof(int)); // 큐를 배열로 모방합니다.
+    int front = 0, rear = 0; // 배열의 앞과 뒤를 가리키는 인덱스입니다.
+
+    for(i = 0; i < Graph->n; i++){
+        Graph->visited[i] = 0; // 모든 정점을 방문하지 않은 상태로 초기화합니다.
+    }
+
+    int start = 0; // 시작 정점을 0으로 고정합니다.
+    printf("%5d", start); // 시작 정점을 출력합니다.
+    Graph->visited[start] = 1; // 시작 정점을 방문했다고 표시합니다.
+    queue[rear++] = start; // 시작 정점을 큐에 추가합니다.
+
+    while(front != rear){ // 큐가 비어있지 않은 동안 반복합니다.
+        int v = queue[front++]; // 큐에서 정점을 꺼냅니다.
+        for(w = Graph->adj_list[v]; w; w = w->link){ // 인접한 모든 정점에 대해
+            if(!Graph->visited[w->vertex]){ // 아직 방문하지 않은 정점이라면
+                printf("%5d", w->vertex); // 정점을 출력합니다.
+                queue[rear++] = w->vertex; // 정점을 큐에 추가합니다.
+                Graph->visited[w->vertex] = 1; // 정점을 방문했다고 표시합니다.
+            }
+        }
+    }
+
+    free(queue); // 큐를 해제합니다.
 }
 void Print(GraphType* Graph){
     int i;
