@@ -18,7 +18,7 @@ typedef struct GraphType{ // 그래프 구조체
 void InitializeGraph(GraphType* Graph);
 void InsertVertex(GraphType* Graph);
 void InsertEdge(GraphType* Graph, int start, int end);
-void DepthFirstSearch(GraphType* Graph, int start);
+void DepthFirstSearch(GraphType* Graph, int v);
 void BreathFirstSearch(GraphType* Graph);
 void Print(GraphType* Graph);
 void Quit(GraphType* Graph);
@@ -78,11 +78,8 @@ int main(){
             InsertEdge(Graph, start, end);
         }
         else if (n == 'd' || n == 'D'){
-            int start;
-            printf("Input Start Vertex Number: ");
-            scanf("%d", &start);
-            while(getchar() != '\n');
-            DepthFirstSearch(Graph, start);
+            DepthFirstSearch(Graph, 0);
+            printf("\n");
         }
         else if (n == 'b' || n == 'B'){
             BreathFirstSearch(Graph);
@@ -152,29 +149,19 @@ void InsertEdge(GraphType* Graph, int start, int end){
 
     printf("Insert Edge\n");
 }
-void DepthFirstSearch(GraphType* Graph, int start){
-    GraphNode* p = Graph->adj_list[start]; 
-    if(start >= Graph->n){ //시작 노드가 노드의 개수보다 크거나 같으면
-        printf("Wrong Vertex Number\n");
-        return;
-    }
-    Graph->visited[start] = 1; //시작 노드를 방문했다고 표시
-    printf("Vertex %d -> ", start); //시작 노드 출력
-    Graph->adj_list[start]; //노드의 다음 노드를 가리키는 포인터를 시작 노드로 설정
-    while(p != NULL){ //포인터가 NULL이 아닐 때까지 반복
-        if(!Graph->visited[p->vertex]){ //포인터가 가리키는 노드를 방문하지 않았으면
-            DepthFirstSearch(Graph, p->vertex); //재귀 호출
-        }
-        p = p->link; //포인터를 다음 노드로 설정
-    }
-    printf("\n");
-    for(int i = 0; i < Graph->n; i++){
-        Graph->visited[i] = 0;
-    }
+void DepthFirstSearch(GraphType* Graph, int v){ //상단 노드는 0으로 고정 GPT의 도움을 받았습니다.
+    GraphNode* w;
+    Graph->visited[v] = 1; // 정점 v를 방문했다고 표시합니다.
+    printf("%5d", v); // 정점 v를 출력합니다.
 
+    for(w = Graph->adj_list[v]; w; w = w->link){ // 인접한 모든 정점에 대해
+        if(!Graph->visited[w->vertex]){ // 아직 방문하지 않은 정점이라면
+            DepthFirstSearch(Graph, w->vertex); // 재귀 호출합니다.
+        }
+    }
 }
 
-void BreathFirstSearch(GraphType* Graph){
+void BreathFirstSearch(GraphType* Graph){ //구현이 어려워서 GPT에 도음을 받아 코드를 만들었습니다.
     int i, j = 0;
     GraphNode* w;
     int* queue = (int*)malloc(Graph->n * sizeof(int)); // 큐를 배열로 모방합니다.
@@ -199,8 +186,12 @@ void BreathFirstSearch(GraphType* Graph){
             }
         }
     }
-
+    printf("\n");
     free(queue); // 큐를 해제합니다.
+
+    for(i = 0; i < Graph->n; i++){
+        Graph->visited[i] = 0; // 모든 정점을 방문하지 않은 상태로 초기화합니다.
+    }
 }
 void Print(GraphType* Graph){
     int i;
